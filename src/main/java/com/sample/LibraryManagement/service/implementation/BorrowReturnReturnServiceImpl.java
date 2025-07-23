@@ -4,6 +4,7 @@ package com.sample.LibraryManagement.service.implementation;
 import com.sample.LibraryManagement.Entity.Book;
 import com.sample.LibraryManagement.Entity.BorrowReturnHistory;
 import com.sample.LibraryManagement.Entity.LibraryMember;
+import com.sample.LibraryManagement.controller.BorrowReturnController;
 import com.sample.LibraryManagement.dao.BookDao;
 import com.sample.LibraryManagement.dao.BorrowReturnHistoryDao;
 import com.sample.LibraryManagement.dao.LibraryMemberDao;
@@ -12,6 +13,8 @@ import com.sample.LibraryManagement.dto.request.ReturnRequestBody;
 import com.sample.LibraryManagement.dto.response.BorrowResponseBody;
 import com.sample.LibraryManagement.dto.response.ReturnResponseBody;
 import com.sample.LibraryManagement.service.BorrowReturnService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +24,7 @@ import java.util.Optional;
 
 @Service
 public class BorrowReturnReturnServiceImpl implements BorrowReturnService {
+    private static final Logger logger = LoggerFactory.getLogger(BorrowReturnController.class);
     @Autowired
     private BookDao bookDao;
     @Autowired
@@ -38,6 +42,7 @@ public class BorrowReturnReturnServiceImpl implements BorrowReturnService {
             if (book.getIsBorrowed() == true) {
                 BorrowResponseBody borrowResponseObj = new BorrowResponseBody();
                 borrowResponseObj.setMessage("Book is already issued to another user, and hence cannot be issued.");
+                logger.info("Book is already lent to another user. Book ID : {}", borrowRequestBody.getBookId());
                 return borrowResponseObj;
             }
             else {
@@ -66,16 +71,19 @@ public class BorrowReturnReturnServiceImpl implements BorrowReturnService {
                     borrowReturnHistoryDao.save(newBorrow);
                     BorrowResponseBody borrowResponseBody = new BorrowResponseBody();
                     borrowResponseBody.setMessage("Book has been lent successfully. Return within two weeks!");
+                    logger.info("Book lending request processed successfully.");
                     return borrowResponseBody;
                 } else {
                     BorrowResponseBody borrowResponseBody = new BorrowResponseBody();
                     borrowResponseBody.setMessage("User has reached limit for issuing books.");
+                    logger.info("Member reached lending limit.");
                     return borrowResponseBody;
                 }
             }
         } else {
             BorrowResponseBody borrowResponseBody = new BorrowResponseBody();
             borrowResponseBody.setMessage("The given Book ID does not exist.");
+            logger.info("Request exited, given book's ID does not exist.");
             return borrowResponseBody;
         }
     }
@@ -107,11 +115,13 @@ public class BorrowReturnReturnServiceImpl implements BorrowReturnService {
             //Returning response
             ReturnResponseBody returnResponseBody = new ReturnResponseBody();
             returnResponseBody.setMessage("Book has been returned successfully.");
+            logger.info("Request proccessed successfully, book returned successfully.");
             return returnResponseBody;
         }
         else{
             ReturnResponseBody returnResponseBody = new ReturnResponseBody();
             returnResponseBody.setMessage("Either the book Id, or the library member Id is invalid.");
+            logger.info("Request processed, either the book's ID, or the member's ID is invalid.");
             return returnResponseBody;
         }
     }

@@ -1,37 +1,37 @@
 package com.sample.LibraryManagement.service.implementation;
 
 import com.sample.LibraryManagement.Entity.Book;
+import com.sample.LibraryManagement.controller.BookController;
 import com.sample.LibraryManagement.dao.BookDao;
 import com.sample.LibraryManagement.dto.BookDTO;
 import com.sample.LibraryManagement.dto.request.BookAddRequestBody;
 import com.sample.LibraryManagement.dto.request.BookUpdateRequestBody;
 import com.sample.LibraryManagement.dto.response.*;
 import com.sample.LibraryManagement.service.BookService;
-import jakarta.persistence.EntityManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
 @Service
 public class BookServiceImpl implements BookService {
+
+    private static final Logger logger = LoggerFactory.getLogger(BookController.class);
+
     @Autowired
     private BookDao bookDao;
 
     @Override
     public BookListResponseBody getAllBooks() {
         List<Book> allBooks = bookDao.findAll();
-
-        return mapToBookDTO(allBooks);
+            return mapToBookDTO(allBooks);
     }
 
-    //EntityMapper - Interface to map from one class to another
+
     private BookListResponseBody mapToBookDTO(List<Book> books) {
         List<BookDTO> bookDTOList = new ArrayList<>();
 
@@ -49,6 +49,7 @@ public class BookServiceImpl implements BookService {
         }
         BookListResponseBody bookList = new BookListResponseBody();
         bookList.setBooks(bookDTOList);
+        logger.info("Successfully fetched list of all books.");
         return bookList;
     }
 
@@ -66,6 +67,7 @@ public class BookServiceImpl implements BookService {
         newbook.setAuthor(bookAddRequestBody.getBook().getAuthor());
         newbook.setGenre(bookAddRequestBody.getBook().getGenre());
         newbook.setPublishedYear(bookAddRequestBody.getBook().getPublishedYear());
+        logger.info("Successfully added new book.");
         return newbook;
     }
 
@@ -73,6 +75,7 @@ public class BookServiceImpl implements BookService {
         bookDao.deleteById(id);
         BookDeletionResponseBody bookDeletionResponseBody = new BookDeletionResponseBody();
         bookDeletionResponseBody.setMessage("Book deleted successfully.");
+        logger.info("Book deleted with ID : {}", id);
         return bookDeletionResponseBody;
     }
 
@@ -90,10 +93,12 @@ public class BookServiceImpl implements BookService {
 
             BookUpdateResponseBody updateResponse = new BookUpdateResponseBody();
             updateResponse.setMessage("Book details updated successfully.");
+            logger.info("Updated book details with ID : {}", bookUpdateRequestBody.getBookDetailsUpdate().getId());
             return updateResponse;
         } else {
             BookUpdateResponseBody failedUpdateResponse = new BookUpdateResponseBody();
             failedUpdateResponse.setMessage("The given ID does not exist.");
+            logger.info("Update request processed with output : Given ID does not exist.");
             return failedUpdateResponse;
         }
     }
@@ -111,10 +116,12 @@ public class BookServiceImpl implements BookService {
 
             BookFetchResponseBody bookFetchResponseBody = new BookFetchResponseBody();
             bookFetchResponseBody.setBook(bookDTO);
+            logger.info("Request to fetch a book's details processed successfully.");
             return bookFetchResponseBody;
         } else {
             BookFetchResponseBody failedFetch = new BookFetchResponseBody();
             failedFetch.setMessage("Fetch failed since the ID does not exist.");
+            logger.info("Request to fetch a book exited, since ID does not exist.");
             return failedFetch;
         }
     }
