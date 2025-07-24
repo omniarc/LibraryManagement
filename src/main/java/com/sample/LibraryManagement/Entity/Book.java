@@ -4,8 +4,9 @@ import jakarta.persistence.*;
 //import lombok.Builder;
 import lombok.Data;
 
-@Entity
+
 @Data
+@Entity
 //@Builder
 @Table(name = "book")
 

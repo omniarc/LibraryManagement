@@ -1,7 +1,6 @@
 package com.sample.LibraryManagement.dto.response;
 
 
-import com.sample.LibraryManagement.dto.AddressDetailsDTO;
 import com.sample.LibraryManagement.dto.LibraryMemberDTO;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -16,6 +15,5 @@ import lombok.*;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class LibraryMemberFetchResponseBody {
     private LibraryMemberDTO user;
-    private AddressDetailsDTO address;
     private String message;
 }

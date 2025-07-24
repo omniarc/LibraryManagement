@@ -1,13 +1,12 @@
 package com.sample.LibraryManagement.dto.response;
 
-
-import com.sample.LibraryManagement.dto.LibraryMemberDTO;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sample.LibraryManagement.dto.LibraryMemberDTO;
 import lombok.*;
 
 import java.util.List;
-//GET
+
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,7 +14,11 @@ import java.util.List;
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class LibraryMemberListResponseBody {
-    private List<LibraryMemberDTO> users;
+public class LibraryMemberPageResponseBody {
+    private List<LibraryMemberDTO> data1;
+    private long totalElements;
+    private int totalPages;
+    private int pageNumber;
+    private int pageSize;
+    private boolean last;
 }
-

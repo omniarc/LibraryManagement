@@ -19,9 +19,14 @@ public class LibraryMemberController {
     LibraryMemberService libraryMemberService;
 
     @GetMapping("all")
-    public LibraryMemberListResponseBody getAllMembers(){
-        logger.info("Request received to fetch the list of all users.");
-        return libraryMemberService.getAllUsers();
+    public LibraryMemberPageResponseBody getMembersPaginated(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "name") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction
+    ){
+        logger.info("Request received to fetch paginated list of library members : page={}, size={}, sortBy={}, direction={}",page, size, sortBy, direction);
+        return libraryMemberService.getMembersPaginated(page, size, sortBy, direction);
     }
 
     @PutMapping("/member")

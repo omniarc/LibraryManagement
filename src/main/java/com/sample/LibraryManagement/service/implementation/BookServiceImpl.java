@@ -11,6 +11,10 @@ import com.sample.LibraryManagement.service.BookService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,33 +29,27 @@ public class BookServiceImpl implements BookService {
     @Autowired
     private BookDao bookDao;
 
-    @Override
-    public BookListResponseBody getAllBooks() {
-        List<Book> allBooks = bookDao.findAll();
-            return mapToBookDTO(allBooks);
-    }
 
-
-    private BookListResponseBody mapToBookDTO(List<Book> books) {
-        List<BookDTO> bookDTOList = new ArrayList<>();
-
-        for (Book book : books) {
-            BookDTO bookDTO = new BookDTO();
-            bookDTO.setId(book.getId());
-            bookDTO.setTitle(book.getTitle());
-            bookDTO.setAuthor(book.getAuthor());
-            bookDTO.setGenre(book.getGenre());
-            bookDTO.setPublishedYear(book.getPublishedYear().toString());
-            bookDTO.setBorrowed(book.getIsBorrowed());
-
-            bookDTOList.add(bookDTO);
-
-        }
-        BookListResponseBody bookList = new BookListResponseBody();
-        bookList.setBooks(bookDTOList);
-        logger.info("Successfully fetched list of all books.");
-        return bookList;
-    }
+//    private BookListResponseBody mapToBookDTO(List<Book> books) {
+//        List<BookDTO> bookDTOList = new ArrayList<>();
+//
+//        for (Book book : books) {
+//            BookDTO bookDTO = new BookDTO();
+//            bookDTO.setId(book.getId());
+//            bookDTO.setTitle(book.getTitle());
+//            bookDTO.setAuthor(book.getAuthor());
+//            bookDTO.setGenre(book.getGenre());
+//            bookDTO.setPublishedYear(book.getPublishedYear().toString());
+//            bookDTO.setBorrowed(book.getIsBorrowed());
+//
+//            bookDTOList.add(bookDTO);
+//
+//        }
+//        BookListResponseBody bookList = new BookListResponseBody();
+//        bookList.setBooks(bookDTOList);
+//        logger.info("Successfully fetched list of all books.");
+//        return bookList;
+//    }
 
     public BookAddResponseBody addBook(BookAddRequestBody bookAddRequestBody) {
         Book newBook = mapToBook(bookAddRequestBody);
@@ -124,6 +122,36 @@ public class BookServiceImpl implements BookService {
             logger.info("Request to fetch a book exited, since ID does not exist.");
             return failedFetch;
         }
+    }
+
+    @Override
+    public BookPageResponseBody getBooksPaginated(int page, int size, String sortBy, String direction){
+        Sort sortBook = direction.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sortBook);
+
+        Page<Book> pagedResult = bookDao.findAll(pageable);
+
+        List<BookDTO> bookDTOList = pagedResult.getContent().stream().map(book -> {
+            BookDTO bookDTO = new BookDTO();
+            bookDTO.setId(book.getId());
+            bookDTO.setTitle(book.getTitle());
+            bookDTO.setAuthor(book.getAuthor());
+            bookDTO.setGenre(book.getGenre());
+            bookDTO.setPublishedYear(book.getPublishedYear());
+            bookDTO.setBorrowed(book.getIsBorrowed());
+            return bookDTO;
+        }).toList();
+
+        BookPageResponseBody bookPageResponseBody = new BookPageResponseBody();
+        bookPageResponseBody.setData(bookDTOList);
+        bookPageResponseBody.setPageNumber(pagedResult.getNumber());
+        bookPageResponseBody.setPageSize(pagedResult.getSize());
+        bookPageResponseBody.setTotalElements(pagedResult.getTotalElements());
+        bookPageResponseBody.setTotalPages(pagedResult.getTotalPages());
+        bookPageResponseBody.setLast(pagedResult.isLast());
+
+        logger.info("Paginated book fetch: page {} of {}", page, pagedResult.getTotalPages());
+        return bookPageResponseBody;
     }
 }
 

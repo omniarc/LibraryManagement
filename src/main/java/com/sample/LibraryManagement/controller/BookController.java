@@ -20,9 +20,12 @@ public class BookController {
     BookService bookService;
 
     @GetMapping("/all")
-    public BookListResponseBody getAllBooks() {
-        logger.info("Request received to fetch the list of all books.");
-        return bookService.getAllBooks();
+    public BookPageResponseBody getAllBooks(@RequestParam(defaultValue = "0") int page,
+                                            @RequestParam(defaultValue = "5") int size,
+                                            @RequestParam(defaultValue = "title") String sortBy,
+                                            @RequestParam(defaultValue = "asc") String direction) {
+        logger.info("Request received to fetch paginated list of books : page={}, size={}, sortBy={}, direction={}",page, size, sortBy, direction);
+        return bookService.getBooksPaginated(page, size, sortBy, direction);
     }
 
     @PutMapping("/book")

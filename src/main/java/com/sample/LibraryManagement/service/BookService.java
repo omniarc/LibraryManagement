@@ -7,11 +7,10 @@ import com.sample.LibraryManagement.dto.response.*;
 
 
 public interface BookService {
-    public BookListResponseBody getAllBooks();
     public BookAddResponseBody addBook(BookAddRequestBody bookAddRequestBody);
     public BookDeletionResponseBody deleteBook(String id);
     public BookUpdateResponseBody updateBook(BookUpdateRequestBody bookUpdateRequestBody);
     public BookFetchResponseBody getBook(String id);
-    //public PaginatedResponseBody getPagedBooks(int page, int size);
+    public BookPageResponseBody getBooksPaginated(int page, int size, String sortBy, String direction);
 
 }

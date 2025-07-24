@@ -16,14 +16,4 @@ public class BookDTO {
     private String genre;
     private String publishedYear;
     private boolean isBorrowed;
-
-//    public BookDTO(String id, String title, String author, String genre, String publishedYear, boolean isBorrowed){
-//        this.id = id;
-//        this.title = title;
-//        this.author = author;
-//        this.genre = genre;
-//        this.publishedYear = publishedYear;
-//        this.isBorrowed = isBorrowed;
-//    }
 }
-// fetch first

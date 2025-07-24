@@ -7,40 +7,25 @@ import com.sample.LibraryManagement.dto.request.LibraryMemberAddRequestBody;
 import com.sample.LibraryManagement.dto.request.LibraryMemberUpdateRequestBody;
 import com.sample.LibraryManagement.dto.response.*;
 import com.sample.LibraryManagement.service.LibraryMemberService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class LibraryMemberServiceImpl implements LibraryMemberService {
+
+    private static final Logger logger = LoggerFactory.getLogger(LibraryMemberService.class);
+
     @Autowired
     private LibraryMemberDao libraryMemberDao;
-
-    @Override
-    public LibraryMemberListResponseBody getAllUsers() {
-        List<LibraryMember> allMembers = libraryMemberDao.findAll();
-        return mapToLibraryMemberDTO(allMembers);
-    }
-
-    private LibraryMemberListResponseBody mapToLibraryMemberDTO(List<LibraryMember> members) {
-        List<LibraryMemberDTO> memberDTOList = new ArrayList<>();
-
-        for (LibraryMember member : members) {
-            LibraryMemberDTO libraryMemberDTO = new LibraryMemberDTO();
-            libraryMemberDTO.setId(member.getId());
-            libraryMemberDTO.setName(member.getName());
-            libraryMemberDTO.setContactNumber(member.getContactNumber());
-
-            memberDTOList.add(libraryMemberDTO);
-
-        }
-        LibraryMemberListResponseBody userList = new LibraryMemberListResponseBody();
-        userList.setUsers(memberDTOList);
-        return userList;
-    }
 
     @Override
     public LibraryMemberAddResponseBody addMember(LibraryMemberAddRequestBody libraryMemberAddRequestBody){
@@ -56,6 +41,7 @@ public class LibraryMemberServiceImpl implements LibraryMemberService {
         LibraryMember newMember = new LibraryMember();
         newMember.setName(libraryMemberAddRequestBody.getUser().getName());
         newMember.setContactNumber(libraryMemberAddRequestBody.getUser().getContactNumber());
+        logger.info("Member addition request processed successfully.");
         return newMember;
     }
 
@@ -64,6 +50,7 @@ public class LibraryMemberServiceImpl implements LibraryMemberService {
         libraryMemberDao.deleteById(id);
         LibraryMemberDeletionResponseBody libraryMemberDeletionResponseBody = new LibraryMemberDeletionResponseBody();
         libraryMemberDeletionResponseBody.setMessage("User deleted successfully.");
+        logger.info("User deletion request processed successfully.");
         return libraryMemberDeletionResponseBody;
     }
 
@@ -77,12 +64,14 @@ public class LibraryMemberServiceImpl implements LibraryMemberService {
             libraryMemberDao.save(existingLibraryMember);
 
             LibraryMemberUpdateResponseBody updateResponseBody = new LibraryMemberUpdateResponseBody();
+            logger.info("User updation request processed successfully.");
             updateResponseBody.setMessage("Details updated successfully");
             return updateResponseBody;
         }
         else {
             LibraryMemberUpdateResponseBody failedUpdateResponse = new LibraryMemberUpdateResponseBody();
             failedUpdateResponse.setMessage("The given ID does not exist.");
+            logger.info("User updation request exited, since given ID is invalid or does not exist.");
             return failedUpdateResponse;
         }
     }
@@ -98,11 +87,41 @@ public class LibraryMemberServiceImpl implements LibraryMemberService {
 
             LibraryMemberFetchResponseBody libraryMemberFetchResponseBody = new LibraryMemberFetchResponseBody();
             libraryMemberFetchResponseBody.setUser(libraryMemberDTO);
+            logger.info("Member fetch request processed successfully.");
             return libraryMemberFetchResponseBody;
         } else {
             LibraryMemberFetchResponseBody failedFetch = new LibraryMemberFetchResponseBody();
             failedFetch.setMessage("Fetch failed since given ID does not exist.");
+            logger.info("Member fetch request failed since given ID does not exist, or is invalid.");
             return failedFetch;
         }
+    }
+
+    @Override
+    public LibraryMemberPageResponseBody getMembersPaginated(int page, int size, String sortBy, String direction){
+        Sort sortMember = direction.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sortMember);
+
+        Page<LibraryMember> pagedResult = libraryMemberDao.findAll(pageable);
+
+        List<LibraryMemberDTO> libraryMemberDTOList = pagedResult.getContent().stream().map(libraryMember -> {
+            LibraryMemberDTO libraryMemberDTO = new LibraryMemberDTO();
+            libraryMemberDTO.setName(libraryMember.getName());
+            libraryMemberDTO.setContactNumber(libraryMember.getContactNumber());
+            return libraryMemberDTO;
+        }).toList();
+
+        LibraryMemberPageResponseBody libraryMemberPageResponseBody = new LibraryMemberPageResponseBody();
+        libraryMemberPageResponseBody.setData1(libraryMemberDTOList);
+        libraryMemberPageResponseBody.setPageNumber(pagedResult.getNumber());
+        libraryMemberPageResponseBody.setPageSize(pagedResult.getSize());
+        libraryMemberPageResponseBody.setTotalElements(pagedResult.getTotalElements());
+        libraryMemberPageResponseBody.setTotalPages(pagedResult.getTotalPages());
+        libraryMemberPageResponseBody.setLast(pagedResult.isLast());
+
+
+        logger.info("Paginated book fetch: page {} of {}", page, pagedResult.getTotalPages());
+        return libraryMemberPageResponseBody;
+
     }
 }
