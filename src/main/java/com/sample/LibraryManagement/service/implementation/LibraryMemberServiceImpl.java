@@ -29,20 +29,13 @@ public class LibraryMemberServiceImpl implements LibraryMemberService {
 
     @Override
     public LibraryMemberAddResponseBody addMember(LibraryMemberAddRequestBody libraryMemberAddRequestBody){
-        LibraryMember newMember = mapToLibraryMember(libraryMemberAddRequestBody);
+        LibraryMember newMember = LibraryMemberDTO.toLibraryMember(libraryMemberAddRequestBody);
         libraryMemberDao.save(newMember);
         LibraryMemberAddResponseBody libraryMemberAddResponseBody = new LibraryMemberAddResponseBody();
         libraryMemberAddResponseBody.setMessage("User added successfully.");
+        logger.info("Request to add a new library member processed successfully.");
         return libraryMemberAddResponseBody;
-    }
 
-
-    private LibraryMember mapToLibraryMember(LibraryMemberAddRequestBody libraryMemberAddRequestBody){
-        LibraryMember newMember = new LibraryMember();
-        newMember.setName(libraryMemberAddRequestBody.getUser().getName());
-        newMember.setContactNumber(libraryMemberAddRequestBody.getUser().getContactNumber());
-        logger.info("Member addition request processed successfully.");
-        return newMember;
     }
 
     @Override
@@ -59,8 +52,7 @@ public class LibraryMemberServiceImpl implements LibraryMemberService {
         Optional<LibraryMember> existingLibraryMemberOptional = libraryMemberDao.findById(id);
         if(existingLibraryMemberOptional.isPresent()){
             LibraryMember existingLibraryMember = existingLibraryMemberOptional.get();
-            existingLibraryMember.setName(libraryMemberUpdateRequestBody.getUserDetailsUpdate().getName());
-            existingLibraryMember.setContactNumber(libraryMemberUpdateRequestBody.getUserDetailsUpdate().getContactNumber());
+            LibraryMemberDTO.updateLibraryMemberRequest(existingLibraryMember, libraryMemberUpdateRequestBody);
             libraryMemberDao.save(existingLibraryMember);
 
             LibraryMemberUpdateResponseBody updateResponseBody = new LibraryMemberUpdateResponseBody();
@@ -80,11 +72,7 @@ public class LibraryMemberServiceImpl implements LibraryMemberService {
         Optional<LibraryMember> existingLibraryMemberOptional = libraryMemberDao.findById(id);
         if(existingLibraryMemberOptional.isPresent()){
             LibraryMember libraryMember = existingLibraryMemberOptional.get();
-            LibraryMemberDTO libraryMemberDTO = new LibraryMemberDTO();
-            libraryMemberDTO.setId(libraryMember.getId());
-            libraryMemberDTO.setName(libraryMember.getName());
-            libraryMemberDTO.setContactNumber(libraryMember.getContactNumber());
-
+            LibraryMemberDTO libraryMemberDTO = LibraryMemberDTO.fromLibraryMember(libraryMember);
             LibraryMemberFetchResponseBody libraryMemberFetchResponseBody = new LibraryMemberFetchResponseBody();
             libraryMemberFetchResponseBody.setUser(libraryMemberDTO);
             logger.info("Member fetch request processed successfully.");
@@ -104,12 +92,9 @@ public class LibraryMemberServiceImpl implements LibraryMemberService {
 
         Page<LibraryMember> pagedResult = libraryMemberDao.findAll(pageable);
 
-        List<LibraryMemberDTO> libraryMemberDTOList = pagedResult.getContent().stream().map(libraryMember -> {
-            LibraryMemberDTO libraryMemberDTO = new LibraryMemberDTO();
-            libraryMemberDTO.setName(libraryMember.getName());
-            libraryMemberDTO.setContactNumber(libraryMember.getContactNumber());
-            return libraryMemberDTO;
-        }).toList();
+        List<LibraryMemberDTO> libraryMemberDTOList = pagedResult.getContent().stream()
+                .map(LibraryMemberDTO::fromLibraryMember)
+                .toList();
 
         LibraryMemberPageResponseBody libraryMemberPageResponseBody = new LibraryMemberPageResponseBody();
         libraryMemberPageResponseBody.setData1(libraryMemberDTOList);

@@ -52,21 +52,11 @@ public class BookServiceImpl implements BookService {
 //    }
 
     public BookAddResponseBody addBook(BookAddRequestBody bookAddRequestBody) {
-        Book newBook = mapToBook(bookAddRequestBody);
+        Book newBook = BookDTO.toBook(bookAddRequestBody);
         bookDao.save(newBook);
         BookAddResponseBody bookAddResponseBody = new BookAddResponseBody();
         bookAddResponseBody.setMessage("Book added successfully.");
         return bookAddResponseBody;
-    }
-
-    private Book mapToBook(BookAddRequestBody bookAddRequestBody) {
-        Book newbook = new Book();
-        newbook.setTitle(bookAddRequestBody.getBook().getTitle());
-        newbook.setAuthor(bookAddRequestBody.getBook().getAuthor());
-        newbook.setGenre(bookAddRequestBody.getBook().getGenre());
-        newbook.setPublishedYear(bookAddRequestBody.getBook().getPublishedYear());
-        logger.info("Successfully added new book.");
-        return newbook;
     }
 
     public BookDeletionResponseBody deleteBook(String id) {
@@ -83,10 +73,7 @@ public class BookServiceImpl implements BookService {
         Optional<Book> existingBookOptional = bookDao.findById(id);
         if (existingBookOptional.isPresent()) {
             Book existingBook = existingBookOptional.get();
-            existingBook.setTitle(bookUpdateRequestBody.getBookDetailsUpdate().getTitle());
-            existingBook.setAuthor(bookUpdateRequestBody.getBookDetailsUpdate().getAuthor());
-            existingBook.setGenre(bookUpdateRequestBody.getBookDetailsUpdate().getGenre());
-            existingBook.setPublishedYear(bookUpdateRequestBody.getBookDetailsUpdate().getPublishedYear());
+            BookDTO.updateBookRequest(existingBook, bookUpdateRequestBody);
             bookDao.save(existingBook);
 
             BookUpdateResponseBody updateResponse = new BookUpdateResponseBody();
@@ -131,16 +118,9 @@ public class BookServiceImpl implements BookService {
 
         Page<Book> pagedResult = bookDao.findAll(pageable);
 
-        List<BookDTO> bookDTOList = pagedResult.getContent().stream().map(book -> {
-            BookDTO bookDTO = new BookDTO();
-            bookDTO.setId(book.getId());
-            bookDTO.setTitle(book.getTitle());
-            bookDTO.setAuthor(book.getAuthor());
-            bookDTO.setGenre(book.getGenre());
-            bookDTO.setPublishedYear(book.getPublishedYear());
-            bookDTO.setBorrowed(book.getIsBorrowed());
-            return bookDTO;
-        }).toList();
+        List<BookDTO> bookDTOList = pagedResult.getContent().stream()
+                .map(BookDTO::fromBook)
+                .toList();
 
         BookPageResponseBody bookPageResponseBody = new BookPageResponseBody();
         bookPageResponseBody.setData(bookDTOList);
@@ -157,3 +137,6 @@ public class BookServiceImpl implements BookService {
 
 
 
+
+
+API -> DispatcherServlet -> Controller
