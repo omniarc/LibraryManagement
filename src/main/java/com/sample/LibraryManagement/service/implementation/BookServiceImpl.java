@@ -11,6 +11,7 @@ import com.sample.LibraryManagement.service.BookService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -39,6 +40,7 @@ public class BookServiceImpl implements BookService {
         return bookAddResponseBody;
     }
 
+    @CacheEvict(value="books", key="#id")
     public BookDeletionResponseBody deleteBook(String id) {
         bookDao.deleteById(id);
         BookDeletionResponseBody bookDeletionResponseBody = new BookDeletionResponseBody();
@@ -47,7 +49,7 @@ public class BookServiceImpl implements BookService {
         return bookDeletionResponseBody;
     }
 
-    @CachePut(value="books", key="id")
+    @CachePut(value="books", key="#id")
     public BookUpdateResponseBody updateBook(BookUpdateRequestBody bookUpdateRequestBody) {
         String id = bookUpdateRequestBody.getBookDetailsUpdate().getId();
         Optional<Book> existingBookOptional = bookDao.findById(id);
@@ -68,7 +70,7 @@ public class BookServiceImpl implements BookService {
         }
     }
 
-    @Cacheable(value = "books", key = "id")
+    @Cacheable(value = "books", key = "#id")
     public BookFetchResponseBody getBook(String id) {
         Optional<Book> existingBookOptional = bookDao.findById(id);
         if (existingBookOptional.isPresent()) {

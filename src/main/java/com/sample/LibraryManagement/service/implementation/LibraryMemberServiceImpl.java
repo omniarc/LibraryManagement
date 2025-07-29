@@ -10,6 +10,8 @@ import com.sample.LibraryManagement.service.LibraryMemberService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,7 +41,7 @@ public class LibraryMemberServiceImpl implements LibraryMemberService {
 
     }
 
-    @Override
+    @CacheEvict(value = "libraryMembers", key = "#id")
     public LibraryMemberDeletionResponseBody deleteMember(String id) {
         libraryMemberDao.deleteById(id);
         LibraryMemberDeletionResponseBody libraryMemberDeletionResponseBody = new LibraryMemberDeletionResponseBody();
@@ -48,6 +50,7 @@ public class LibraryMemberServiceImpl implements LibraryMemberService {
         return libraryMemberDeletionResponseBody;
     }
 
+    @CachePut(value="libraryMembers", key="#id")
     public LibraryMemberUpdateResponseBody updateMember(LibraryMemberUpdateRequestBody libraryMemberUpdateRequestBody){
         String id = libraryMemberUpdateRequestBody.getUserDetailsUpdate().getId();
         Optional<LibraryMember> existingLibraryMemberOptional = libraryMemberDao.findById(id);
