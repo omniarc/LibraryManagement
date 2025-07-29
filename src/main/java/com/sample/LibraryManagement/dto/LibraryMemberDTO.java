@@ -18,8 +18,8 @@ public class LibraryMemberDTO {
     public static LibraryMemberDTO fromLibraryMember(LibraryMember libraryMember){
         LibraryMemberDTO libraryMemberDTO = new LibraryMemberDTO();
         libraryMemberDTO.setId(libraryMember.getId());
-        libraryMemberDTO.setName(libraryMemberDTO.getName());
-        libraryMemberDTO.setContactNumber(libraryMemberDTO.getContactNumber());
+        libraryMemberDTO.setName(libraryMember.getName());
+        libraryMemberDTO.setContactNumber(libraryMember.getContactNumber());
         return libraryMemberDTO;
     }
 

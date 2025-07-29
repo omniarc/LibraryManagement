@@ -11,13 +11,14 @@ import com.sample.LibraryManagement.service.BookService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,27 +30,6 @@ public class BookServiceImpl implements BookService {
     @Autowired
     private BookDao bookDao;
 
-
-//    private BookListResponseBody mapToBookDTO(List<Book> books) {
-//        List<BookDTO> bookDTOList = new ArrayList<>();
-//
-//        for (Book book : books) {
-//            BookDTO bookDTO = new BookDTO();
-//            bookDTO.setId(book.getId());
-//            bookDTO.setTitle(book.getTitle());
-//            bookDTO.setAuthor(book.getAuthor());
-//            bookDTO.setGenre(book.getGenre());
-//            bookDTO.setPublishedYear(book.getPublishedYear().toString());
-//            bookDTO.setBorrowed(book.getIsBorrowed());
-//
-//            bookDTOList.add(bookDTO);
-//
-//        }
-//        BookListResponseBody bookList = new BookListResponseBody();
-//        bookList.setBooks(bookDTOList);
-//        logger.info("Successfully fetched list of all books.");
-//        return bookList;
-//    }
 
     public BookAddResponseBody addBook(BookAddRequestBody bookAddRequestBody) {
         Book newBook = BookDTO.toBook(bookAddRequestBody);
@@ -67,8 +47,8 @@ public class BookServiceImpl implements BookService {
         return bookDeletionResponseBody;
     }
 
+    @CachePut(value="books", key="id")
     public BookUpdateResponseBody updateBook(BookUpdateRequestBody bookUpdateRequestBody) {
-        // Book updBook = mapToBook(bookUpdateRequestBody);
         String id = bookUpdateRequestBody.getBookDetailsUpdate().getId();
         Optional<Book> existingBookOptional = bookDao.findById(id);
         if (existingBookOptional.isPresent()) {
@@ -88,17 +68,12 @@ public class BookServiceImpl implements BookService {
         }
     }
 
+    @Cacheable(value = "books", key = "id")
     public BookFetchResponseBody getBook(String id) {
         Optional<Book> existingBookOptional = bookDao.findById(id);
         if (existingBookOptional.isPresent()) {
             Book book = existingBookOptional.get();
-            BookDTO bookDTO = new BookDTO();
-            bookDTO.setId(book.getId());
-            bookDTO.setTitle(book.getTitle());
-            bookDTO.setAuthor(book.getAuthor());
-            bookDTO.setPublishedYear(book.getPublishedYear());
-            bookDTO.setGenre(book.getGenre());
-
+            BookDTO bookDTO = BookDTO.fromBook(book);
             BookFetchResponseBody bookFetchResponseBody = new BookFetchResponseBody();
             bookFetchResponseBody.setBook(bookDTO);
             logger.info("Request to fetch a book's details processed successfully.");

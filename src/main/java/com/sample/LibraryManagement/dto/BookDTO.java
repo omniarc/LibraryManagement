@@ -28,9 +28,9 @@ public class BookDTO {
         BookDTO bookDTO = new BookDTO();
         bookDTO.setId(book.getId());
         bookDTO.setTitle(book.getTitle());
-        book.setAuthor(book.getAuthor());
-        book.setGenre(book.getGenre());
-        book.setPublishedYear(book.getPublishedYear());
+        bookDTO.setAuthor(book.getAuthor());
+        bookDTO.setGenre(book.getGenre());
+        bookDTO.setPublishedYear(book.getPublishedYear());
         bookDTO.setBorrowed(book.getIsBorrowed());
         return bookDTO;
     }
@@ -45,6 +45,7 @@ public class BookDTO {
         return newbook;
     }
 
+    //Updating pre-existing book.
     public static void updateBookRequest(Book book, BookUpdateRequestBody bookUpdateRequestBody){
         book.setTitle(bookUpdateRequestBody.getBookDetailsUpdate().getTitle());
         book.setAuthor(bookUpdateRequestBody.getBookDetailsUpdate().getAuthor());

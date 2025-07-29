@@ -10,6 +10,7 @@ import com.sample.LibraryManagement.service.LibraryMemberService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -68,6 +69,7 @@ public class LibraryMemberServiceImpl implements LibraryMemberService {
         }
     }
 
+    @Cacheable(value = "libraryMembers", key = "#id")
     public LibraryMemberFetchResponseBody getMember(String id){
         Optional<LibraryMember> existingLibraryMemberOptional = libraryMemberDao.findById(id);
         if(existingLibraryMemberOptional.isPresent()){
