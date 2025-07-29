@@ -61,6 +61,7 @@ public class BookServiceImpl implements BookService {
             BookUpdateResponseBody updateResponse = new BookUpdateResponseBody();
             updateResponse.setMessage("Book details updated successfully.");
             logger.info("Updated book details with ID : {}", bookUpdateRequestBody.getBookDetailsUpdate().getId());
+            logger.info("Updated information added to cache.");
             return updateResponse;
         } else {
             BookUpdateResponseBody failedUpdateResponse = new BookUpdateResponseBody();
@@ -79,6 +80,7 @@ public class BookServiceImpl implements BookService {
             BookFetchResponseBody bookFetchResponseBody = new BookFetchResponseBody();
             bookFetchResponseBody.setBook(bookDTO);
             logger.info("Request to fetch a book's details processed successfully.");
+            logger.info("Fetch body added to cache.");
             return bookFetchResponseBody;
         } else {
             BookFetchResponseBody failedFetch = new BookFetchResponseBody();

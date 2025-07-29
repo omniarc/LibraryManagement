@@ -60,14 +60,14 @@ public class LibraryMemberServiceImpl implements LibraryMemberService {
             libraryMemberDao.save(existingLibraryMember);
 
             LibraryMemberUpdateResponseBody updateResponseBody = new LibraryMemberUpdateResponseBody();
-            logger.info("User updation request processed successfully.");
+            logger.info("User update request processed successfully.");
             updateResponseBody.setMessage("Details updated successfully");
             return updateResponseBody;
         }
         else {
             LibraryMemberUpdateResponseBody failedUpdateResponse = new LibraryMemberUpdateResponseBody();
             failedUpdateResponse.setMessage("The given ID does not exist.");
-            logger.info("User updation request exited, since given ID is invalid or does not exist.");
+            logger.info("User update request exited, since given ID is invalid or does not exist.");
             return failedUpdateResponse;
         }
     }
