@@ -16,6 +16,8 @@ import com.sample.LibraryManagement.service.BorrowReturnService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -33,7 +35,7 @@ public class BorrowReturnReturnServiceImpl implements BorrowReturnService {
     private LibraryMemberDao libraryMemberDao;
 
 
-    @Override
+    @Cacheable(value = "books", key = "#id")
     public BorrowResponseBody borrowBook(BorrowRequestBody borrowRequestBody) {
         //Checking if said book is available for lending or not.
         Optional<Book> bookOptional = bookDao.findById(borrowRequestBody.getBookId());
@@ -91,7 +93,7 @@ public class BorrowReturnReturnServiceImpl implements BorrowReturnService {
 
 
 
-    @Override
+    @CacheEvict(value="books", key="#id")
     public ReturnResponseBody returnBook(ReturnRequestBody returnRequestBody) {
 
         Optional<BorrowReturnHistory> borrowReturnHistory = borrowReturnHistoryDao.findByLibraryMemberIdAndBookIdAndIsActiveAndIsDeleted(returnRequestBody.getLibraryMemberId(), returnRequestBody.getBookId(), true, false);
