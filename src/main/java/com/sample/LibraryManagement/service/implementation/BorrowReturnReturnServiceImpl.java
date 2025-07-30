@@ -101,24 +101,49 @@ public class BorrowReturnReturnServiceImpl implements BorrowReturnService {
             BorrowReturnHistory borrowReturnHistory1 = borrowReturnHistory.get();
 
             //Fetching timestamp of book being returned.
-            LocalDateTime Stamp = LocalDateTime.now();
-            DateTimeFormatter Formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy");
-            String formattedStamp = Stamp.format(Formatter);
+            LocalDateTime returnStamp = LocalDateTime.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy");
+            String formattedStamp = returnStamp.format(formatter);
 
-            //Background changes to return book.
-            borrowReturnHistory1.setReturnDate(formattedStamp);
-            borrowReturnHistory1.setIsActive(false);
-            borrowReturnHistory1.setIsDeleted(true);
-            Optional<Book> existingBookIdOptional = bookDao.findById(returnRequestBody.getBookId());
-            Book book = existingBookIdOptional.get();
-            book.setIsBorrowed(false);
-            borrowReturnHistoryDao.save(borrowReturnHistory1);
+            //Calculation of due date and fine generation
+            LocalDateTime dueDate = LocalDateTime.parse(borrowReturnHistory1.getDueDate(), formatter);
+            long fineAmount = 0;
+            if (returnStamp.isAfter(dueDate)) {
+                long daysLate = java.time.Duration.between(dueDate, returnStamp).toDays();
+                fineAmount = daysLate * 5; //Assuming fine of $5 per day
 
-            //Returning response
-            ReturnResponseBody returnResponseBody = new ReturnResponseBody();
-            returnResponseBody.setMessage("Book has been returned successfully.");
-            logger.info("Request proccessed successfully, book returned successfully.");
-            return returnResponseBody;
+
+                //Background changes to return book.
+                borrowReturnHistory1.setReturnDate(formattedStamp);
+                borrowReturnHistory1.setIsActive(false);
+                borrowReturnHistory1.setIsDeleted(true);
+                Optional<Book> existingBookIdOptional = bookDao.findById(returnRequestBody.getBookId());
+                Book book = existingBookIdOptional.get();
+                book.setIsBorrowed(false);
+                borrowReturnHistoryDao.save(borrowReturnHistory1);
+
+                //Returning response
+                ReturnResponseBody returnResponseBody = new ReturnResponseBody();
+                returnResponseBody.setMessage("Book has been returned successfully. Fine due to late return: $" + fineAmount);
+                logger.info("Request proccessed successfully, fine generated due to late return.");
+                return returnResponseBody;
+            } else {
+                //Background changes to return book.
+                borrowReturnHistory1.setReturnDate(formattedStamp);
+                borrowReturnHistory1.setIsActive(false);
+                borrowReturnHistory1.setIsDeleted(true);
+                Optional<Book> existingBookIdOptional = bookDao.findById(returnRequestBody.getBookId());
+                Book book = existingBookIdOptional.get();
+                book.setIsBorrowed(false);
+                borrowReturnHistoryDao.save(borrowReturnHistory1);
+
+                //Returning response
+                ReturnResponseBody returnResponseBody = new ReturnResponseBody();
+                returnResponseBody.setMessage("Book has been returned successfully. No fines generated.");
+                logger.info("Request processed successfully, book returned successfully.");
+                return returnResponseBody;
+            }
+
         }
         else{
             ReturnResponseBody returnResponseBody = new ReturnResponseBody();
