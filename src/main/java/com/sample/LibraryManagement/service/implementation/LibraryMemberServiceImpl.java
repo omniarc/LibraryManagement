@@ -9,7 +9,6 @@ import com.sample.LibraryManagement.dto.response.*;
 import com.sample.LibraryManagement.service.LibraryMemberService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -27,8 +26,11 @@ public class LibraryMemberServiceImpl implements LibraryMemberService {
 
     private static final Logger logger = LoggerFactory.getLogger(LibraryMemberService.class);
 
-    @Autowired
-    private LibraryMemberDao libraryMemberDao;
+    private final LibraryMemberDao libraryMemberDao;
+
+    public LibraryMemberServiceImpl(LibraryMemberDao libraryMemberDao){
+        this.libraryMemberDao = libraryMemberDao;
+    }
 
     @Override
     public LibraryMemberAddResponseBody addMember(LibraryMemberAddRequestBody libraryMemberAddRequestBody){

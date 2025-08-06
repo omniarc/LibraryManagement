@@ -6,7 +6,6 @@ import com.sample.LibraryManagement.dto.response.*;
 import com.sample.LibraryManagement.service.LibraryMemberService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,8 +14,10 @@ public class LibraryMemberController {
 
     private static final Logger logger = LoggerFactory.getLogger(LibraryMemberController.class);
 
-    @Autowired
-    LibraryMemberService libraryMemberService;
+    private final LibraryMemberService libraryMemberService;
+    public LibraryMemberController(LibraryMemberService libraryMemberService){
+        this.libraryMemberService = libraryMemberService;
+    }
 
     @GetMapping("all")
     public LibraryMemberPageResponseBody getMembersPaginated(

@@ -6,7 +6,6 @@ import com.sample.LibraryManagement.dto.response.*;
 import com.sample.LibraryManagement.service.BookService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,8 +15,10 @@ public class BookController {
     private static final Logger logger = LoggerFactory.getLogger(BookController.class);
 
 
-    @Autowired
-    BookService bookService;
+    private final BookService bookService;
+    public BookController(BookService bookService){
+        this.bookService = bookService;
+    }
 
     @GetMapping("/all")
     public BookPageResponseBody getAllBooks(@RequestParam(defaultValue = "0") int page,

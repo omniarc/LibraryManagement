@@ -7,7 +7,6 @@ import com.sample.LibraryManagement.dto.response.ReturnResponseBody;
 import com.sample.LibraryManagement.service.BorrowReturnService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,8 +15,10 @@ public class BorrowReturnController {
 
     private static final Logger logger = LoggerFactory.getLogger(BorrowReturnController.class);
 
-    @Autowired
-    BorrowReturnService borrowReturnService;
+    private final BorrowReturnService borrowReturnService;
+    public BorrowReturnController(BorrowReturnService borrowReturnService){
+        this.borrowReturnService = borrowReturnService;
+    }
 
     @PostMapping("/borrow")
     public BorrowResponseBody borrowBook(@RequestBody BorrowRequestBody borrowRequestBody){

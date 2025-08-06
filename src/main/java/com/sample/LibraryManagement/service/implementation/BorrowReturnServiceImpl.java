@@ -15,9 +15,6 @@ import com.sample.LibraryManagement.dto.response.ReturnResponseBody;
 import com.sample.LibraryManagement.service.BorrowReturnService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -25,19 +22,22 @@ import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @Service
-public class BorrowReturnReturnServiceImpl implements BorrowReturnService {
+public class BorrowReturnServiceImpl implements BorrowReturnService {
     private static final Logger logger = LoggerFactory.getLogger(BorrowReturnController.class);
-    @Autowired
-    private BookDao bookDao;
-    @Autowired
-    private BorrowReturnHistoryDao borrowReturnHistoryDao;
-    @Autowired
-    private LibraryMemberDao libraryMemberDao;
 
+    private final BookDao bookDao;
+    private final BorrowReturnHistoryDao borrowReturnHistoryDao;
+    private final LibraryMemberDao libraryMemberDao;
 
-    @Cacheable(value = "books", key = "#id")
+    public BorrowReturnServiceImpl(BookDao bookDao, BorrowReturnHistoryDao borrowReturnHistoryDao, LibraryMemberDao libraryMemberDao){
+        this.bookDao = bookDao;
+        this.borrowReturnHistoryDao = borrowReturnHistoryDao;
+        this.libraryMemberDao = libraryMemberDao;
+    }
+
+    @Override
     public BorrowResponseBody borrowBook(BorrowRequestBody borrowRequestBody) {
-        //Checking if said book is available for lending or not.
+        //Validation check for book availability.
         Optional<Book> bookOptional = bookDao.findById(borrowRequestBody.getBookId());
         if(bookOptional.isPresent()) {
             Book book = bookOptional.get();
@@ -93,7 +93,7 @@ public class BorrowReturnReturnServiceImpl implements BorrowReturnService {
 
 
 
-    @CacheEvict(value="books", key="#id")
+    @Override
     public ReturnResponseBody returnBook(ReturnRequestBody returnRequestBody) {
 
         Optional<BorrowReturnHistory> borrowReturnHistory = borrowReturnHistoryDao.findByLibraryMemberIdAndBookIdAndIsActiveAndIsDeleted(returnRequestBody.getLibraryMemberId(), returnRequestBody.getBookId(), true, false);
